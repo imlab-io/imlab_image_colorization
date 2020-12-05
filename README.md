@@ -1,81 +1,39 @@
 ---
 layout: post
-title: İmge Renklendirme (Image Colorization)
-date: '2016-04-14T21:11:00.000+03:00'
+title: İmge Renklendirme
+slug: image-colorization
 author: Bahri ABACI
 categories:
 - Görüntü İşleme Uygulamaları
 - Lineer Cebir
 - Nümerik Yöntemler
-modified_time: '2016-04-14T21:15:15.749+03:00'
+references: "Colorization Using Optimization"
 thumbnail: /assets/post_resources/image_colorization/thumbnail.png
 ---
 
-Kısa bir süre önceki [İmge Renksizleştirme yazımızda](http://www.cescript.com/2015/10/imge-renksizlestirme-image.html)
-renkli imgelerin gri seviye dönüşümü için yenilikçi bir yöntem
-incelemiştik. Yöntem üç farklı kanaldan (R,G,B) oluşan renkli sayısal
-bir imgeyi tek bir kanala indirirken doku bilgisinin korunmasınını da
-güvence altına almaktaydı. Bu yazımızda ise önceki yöntemin tersi olarak
-İmge Renklendirmeyi ele alacağız. İmge renklendirme (Image colorization)
-gri seviye kodlanmış bir imgeden renkli imge elde etmeye yarayan bir
-yöntemdir. Genellikle görselliği iyileştirmek için kullanılsa da gri
-seviye kameradan / sensörden alınan görüntülerin renklendirilmesi, eski
-fotoğrafların canlandırılması veya imge renklerinin değiştirilmesi gibi
+Kısa bir süre önceki [İmge Renksizleştirme yazımızda]({% post_url 2015-10-16-imge-renksizlestirme %}) renkli imgelerin gri seviye dönüşümü için yenilikçi bir yöntem incelemiştik. Yöntem üç farklı kanaldan (R,G,B) oluşan renkli sayısal bir imgeyi tek bir kanala indirirken doku bilgisinin korunmasını da güvence altına almaktaydı. Bu yazımızda ise önceki yöntemin tersi olarak İmge Renklendirmeyi ele alacağız. İmge renklendirme (Image colorization) gri seviye kodlanmış bir imgeden renkli imge elde etmeye yarayan bir yöntemdir. Genellikle görselliği iyileştirmek için kullanılsa da gri seviye kameradan / sensörden alınan görüntülerin renklendirilmesi, eski fotoğrafların canlandırılması veya imge renklerinin değiştirilmesi gibi
 uygulamalarda da kullanılmaktadır.  
   
 <!--more-->
 
-Çoğu görüntü işleme uygulamasında renkli imge 24 bitten oluşmakta ve
-yaklaşık 16 milyon renk barındırmaktadır. Gri seviye dönüşümü ile elde
-edilen tek kanallı imgede ise 8 bit ile tutulan 256 farklı gri tonu
-bulunmaktadır. Renk düzeyleri üzerinden bir hesaplama yapılırsa dönüşüm
-sonucunda renkli imgedeki yaklaşık 65 bin (16 milyon / 256 ) rengin tek
-bir siyahın tonu ile ifade edildiği görülür. Aşağıda verilen imgede yer
-alan bütün renklerin gri seviye dönüşümü sonucu aldığı değerler yaklaşık
+Çoğu görüntü işleme uygulamasında renkli imge 24 bitten oluşmakta ve yaklaşık 16 milyon renk barındırmaktadır. Gri seviye dönüşümü ile elde edilen tek kanallı imgede ise 8 bit ile tutulan 256 farklı gri tonu bulunmaktadır. Renk düzeyleri üzerinden bir hesaplama yapılırsa dönüşüm sonucunda renkli imgedeki yaklaşık 65 bin (16 milyon / 256 ) rengin tek bir siyahın tonu ile ifade edildiği görülür. Aşağıda verilen imgede yer alan bütün renklerin gri seviye dönüşümü sonucu aldığı değerler yaklaşık
 aynıdır.  
   
 ![Eş Parlaklık Seviyeleri][isoluminance]
   
-Bu çok yüksek veri sıkıştırmasına imge renklendirme açısından bakacak
-olursak, ortalamada tek bir siyahın tonuna karşılık olası 65 bin farklı
-renk bulunduğu görülür. Tek bir gözek için 65 bin farklı olasılığın
-bulunduğu bu problemde, akıllı bir yöntem kullanmadan 5x5 boyutunda bir
-imge için dahi hesaplamaları yapmak oldukça güçtür.  
+Bu çok yüksek veri sıkıştırmasına imge renklendirme açısından bakacak olursak, ortalamada tek bir siyahın tonuna karşılık olası 65 bin farklı renk bulunduğu görülür. Tek bir gözek için 65 bin farklı olasılığın bulunduğu bu problemde, akıllı bir yöntem kullanmadan 5x5 boyutunda bir imge için dahi hesaplamaları yapmak oldukça güçtür.  
   
-Yazımızın konusu olan imge renklendirme için, literatürdeki en ilgi
-çekici yayın 2004 yılı Siggraph konferansında *Colorization using
-Optimization* yayını ile önerilmiştir. Çalışmada renkli imgedeki
-renkleri bulabilmek için imgenin bazı noktaları elle çizikler atarak
-renklendirilmiştir. Ardından yapılan bu renklendirmeler iteratif olarak
-gri seviyeler üzerine yayılarak imgenin tamamının renklenmesi
-sağlanmıştır. Aşağıda bir imgenin renklendirilmesine ilişkin adımlar
-gösterilmiştir.  
+Yazımızın konusu olan imge renklendirme için, literatürdeki en ilgi çekici yayın 2004 yılı Siggraph konferansında *Colorization using Optimization* yayını ile önerilmiştir. Çalışmada renkli imgedeki renkleri bulabilmek için imgenin bazı noktaları elle çizikler atarak renklendirilmiştir. Ardından yapılan bu renklendirmeler iteratif olarak gri seviyeler üzerine yayılarak imgenin tamamının renklenmesi sağlanmıştır. Aşağıda bir imgenin renklendirilmesine ilişkin adımlar gösterilmiştir.  
   
 ![Görüntü Renklendirme Adımları][steps]
   
-Resimde ilk sırada renklendirmek istenen gri seviye imge yer almaktadır.
-İkinci sırada ise algoritmanın başlayabilmesi için elle işaretlenen
-kısmi renkli imge verilmiştir. Üçüncü sıradan itibaren de sırayla
-algoritmanın 50., 250. ve 1000. iterasyonlarına ait sonuçlar
-gösterilmiştir. Dikkatli bakılacak olursa elle işaretlenen renkler adım
-adım gri seviyeler üzerine yayılmakta ve bu sırada imgedeki doku ve
-parlaklık bilgisi de korunmaktadır.  
+Resimde ilk sırada renklendirmek istenen gri seviye imge yer almaktadır. İkinci sırada ise algoritmanın başlayabilmesi için elle işaretlenen kısmi renkli imge verilmiştir. Üçüncü sıradan itibaren de sırayla algoritmanın 50., 250. ve 1000. iterasyonlarına ait sonuçlar gösterilmiştir. Dikkatli bakılacak olursa elle işaretlenen renkler adım adım gri seviyeler üzerine yayılmakta ve bu sırada imgedeki doku ve parlaklık bilgisi de korunmaktadır.
   
 Yöntemin çalışması iki temel prensibe dayanmaktadır.  
   
-**1)** *Renklendirme işlemi ile elde edilen renkli imgenin ( yukarıda
-son sıradaki resim ) gri seviyesi, verilen gri imge ile birebir aynı
-olmak zorundadır. *  
+**1)** *Renklendirme işlemi ile elde edilen renkli imgenin ( yukarıda son sıradaki resim ) gri seviyesi, verilen gri imge ile birebir aynı olmak zorundadır.*  
   
-Bu koşulu sağlamak için RGB uzayı yerine bir kanalı gri seviyeyi
-gösteren bir uzay (HSV, YUV, YIQ, vs.) kullanmak problemi oldukça
-basitleştirmektedir. Böyle bir uzay dönüşümü sonrasında aranan renkli
-imgenin gri seviye kanalı (HSV ise V, YUV ise Y kanalı) doğrudan giriş
-resmine eşitlenebilir. Renklerin aranması ise diğer iki kanal (HSV ise H
-ve S, YUV ise U ve V)  üzerinden yapılırsa, imgenin gri seviyesi
-değişmeden renkleri değiştirilebilir. Yazımızda bildiride de önerildiği
-gibi YUV renk uzayı kullanılmış ve dönüşüm için aşağıdaki kod satırları
-kullanılmıştır.
+Bu koşulu sağlamak için RGB uzayı yerine bir kanalı gri seviyeyi gösteren bir uzay (HSV, YUV, YIQ, vs.) kullanmak problemi oldukça basitleştirmektedir. Böyle bir uzay dönüşümü sonrasında aranan renkli imgenin gri seviye kanalı (HSV ise V, YUV ise Y kanalı) doğrudan giriş resmine eşitlenebilir. Renklerin aranması ise diğer iki kanal (HSV ise H ve S, YUV ise U ve V)  üzerinden yapılırsa, imgenin gri seviyesi değişmeden renkleri değiştirilebilir. Yazımızda bildiride de önerildiği gibi YUV renk uzayı kullanılmış ve dönüşüm için aşağıdaki kod satırları kullanılmıştır.
 
   
 ```c
@@ -94,27 +52,19 @@ for(int n=0; n < N; n++)
 ```
   
   
-**2)** *Belirli bir komşulukta yer alan iki gri seviye birbirine
-yakınsa, -renklendirme işlemi sonrası- renkleri de birbirine yakın
-olmalıdır.*  
+**2)** *Belirli bir komşulukta yer alan iki gri seviye birbirine yakınsa, -renklendirme işlemi sonrası- renkleri de birbirine yakın olmalıdır.*  
 
-Bu  prensip ise aşağıdaki formülasyon ile bir enerji optimizasyonu
-problemine dönüştürülebilir.
+Bu  prensip ise aşağıdaki formülasyon ile bir enerji optimizasyonu problemine dönüştürülebilir.
 
-!["E(U)=\sum_{r} \left ( U(r)- \sum_{s\in N(r)} w_{rs}U(s) \right)^2"](https://render.githubusercontent.com/render/math?math=E%28U%29%3d%5csum_%7br%7d%20%5cleft%20%28%20U%28r%29-%20%5csum_%7bs%5cin%20N%28r%29%7d%20w_%7brs%7dU%28s%29%20%5cright%29%5e2)
+<p align="center"><img src="assets/post_resources/math//8c6f0daf99e32ba81dc79ab2ed3a6f04.svg?invert_in_darkmode" align=middle width=281.30945699999995pt height=62.53027769999999pt/></p>
 
-Yukarıda verilen ifade de !["U"](https://render.githubusercontent.com/render/math?math=U), YUV renk uzayının bir bileşenini
-göstermektedir ve çalışmada bu ifade !["V"](https://render.githubusercontent.com/render/math?math=V) için de çözülmektedir. İfade,
-bir !["r"](https://render.githubusercontent.com/render/math?math=r) gözeğinin değerinin, kendisini çevreleyen !["N(r)"](https://render.githubusercontent.com/render/math?math=N%28r%29) komşuluğundaki
-gözeklerin ağırlıklı ortalamasına yakın olmasını zorlamaktadır. Burada
-!["w_{rs}"](https://render.githubusercontent.com/render/math?math=w_%7brs%7d), komşu gözeğin merkez gözeğe olan uzaklığını ölçmek için
-kullanılan ağırlık metriğini göstermektedir ve !["w_{rs} \sim e^{-(Y(r)-Y(s))^2}"](https://render.githubusercontent.com/render/math?math=w_%7brs%7d%20%5csim%20e%5e%7b-%28Y%28r%29-Y%28s%29%29%5e2%7d) formülü ile hesaplanmaktadır. Bu ifade basit şekilde
-!["r"](https://render.githubusercontent.com/render/math?math=r) ve !["s"](https://render.githubusercontent.com/render/math?math=s) noktaları arasındaki gri seviye farklılığı ölçmektedir.
-Çalışmada komşuluk derecesi bir olarak seçilmiş ve herhangi bir gözeğin
-etrafını saran sekiz gözek komşu olarak değerlendirilmiştir. Aşağıda
-verilen kod satırlarında imgenin gözekleri tek tek dolanılmış ve renksiz
-olan her gözek için 8 komşusunun bu gözeğe olan gri seviye farklılıkları
-hesaplanmıştır. Hesaplanan bu değerler !["A"](https://render.githubusercontent.com/render/math?math=A) değişkeninde saklanmıştır.
+Yukarıda verilen ifade de <img src="assets/post_resources/math//6bac6ec50c01592407695ef84f457232.svg?invert_in_darkmode" align=middle width=13.01596064999999pt height=22.465723500000017pt/>, YUV renk uzayının bir bileşenini göstermektedir ve çalışmada bu ifade <img src="assets/post_resources/math//a9a3a4a202d80326bda413b5562d5cd1.svg?invert_in_darkmode" align=middle width=13.242037049999992pt height=22.465723500000017pt/> için de çözülmektedir. İfade, bir <img src="assets/post_resources/math//89f2e0d2d24bcf44db73aab8fc03252c.svg?invert_in_darkmode" align=middle width=7.87295519999999pt height=14.15524440000002pt/> gözeğinin değerinin, kendisini çevreleyen <img src="assets/post_resources/math//0795a09b10f06d8180b24b652140f0cc.svg?invert_in_darkmode" align=middle width=35.65835789999999pt height=24.65753399999998pt/> komşuluğundaki gözeklerin ağırlıklı ortalamasına yakın olmasını zorlamaktadır. Burada <img src="assets/post_resources/math//2a00fc03470855726f65f9d16bf65480.svg?invert_in_darkmode" align=middle width=24.43030259999999pt height=14.15524440000002pt/>, komşu gözeğin merkez gözeğe olan uzaklığını ölçmek için kullanılan ağırlık metriğini göstermektedir ve 
+
+<p align="center"><img src="assets/post_resources/math//ba5f2da3b79c2b615af6cdac8934cc06.svg?invert_in_darkmode" align=middle width=145.56621255pt height=19.51056195pt/></p>
+
+formülü ile hesaplanmaktadır. Bu ifade basit şekilde <img src="assets/post_resources/math//89f2e0d2d24bcf44db73aab8fc03252c.svg?invert_in_darkmode" align=middle width=7.87295519999999pt height=14.15524440000002pt/> ve <img src="assets/post_resources/math//6f9bad7347b91ceebebd3ad7e6f6f2d1.svg?invert_in_darkmode" align=middle width=7.7054801999999905pt height=14.15524440000002pt/> noktaları arasındaki gri seviye farklılığı ölçmektedir.
+
+Çalışmada komşuluk derecesi bir olarak seçilmiş ve herhangi bir gözeğin etrafını saran sekiz gözek komşu olarak değerlendirilmiştir. Aşağıda verilen kod satırlarında imgenin gözekleri tek tek dolanılmış ve renksiz olan her gözek için 8 komşusunun bu gözeğe olan gri seviye farklılıkları hesaplanmıştır. Hesaplanan bu değerler <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/> değişkeninde saklanmıştır.
 
   
 ```c
@@ -133,71 +83,32 @@ for(r=0; r < M*N; r++)
 ```
   
 
-Optimizasyon problemini çözmeye geçmeden önce matrisleri kullanarak
-enerji ifadesini daha sade ve çözümü daha kolay görülür şekilde yazalım.
-Yukarıda verilen enerji ifadesi !["E(U)=||U(r)-W_{rs}U(s)||^2"](https://render.githubusercontent.com/render/math?math=E%28U%29%3d%7c%7cU%28r%29-W_%7brs%7dU%28s%29%7c%7c%5e2)matrissel
-biçiminde yazılabilir. Bu durumda enerji fonksiyonunu en küçükleyen
-!["U(s)"](https://render.githubusercontent.com/render/math?math=U%28s%29) vektörü de, bilinen !["U(r)"](https://render.githubusercontent.com/render/math?math=U%28r%29) ve !["W_{rs}"](https://render.githubusercontent.com/render/math?math=W_%7brs%7d) matrisleri kullanılarak
-!["U(s)=W_{rs}^{-1}U(r)"](https://render.githubusercontent.com/render/math?math=U%28s%29%3dW_%7brs%7d%5e%7b-1%7dU%28r%29)işlemi ile bulunur. Burada !["W_{rs}"](https://render.githubusercontent.com/render/math?math=W_%7brs%7d) matrisi
-her satırın da 8 komşu için ağırlıkları saklayan !["MN \times MN"](https://render.githubusercontent.com/render/math?math=MN%20%5ctimes%20MN) boyutlu
-bir seyrek matrisdir. !["W_{rs}"](https://render.githubusercontent.com/render/math?math=W_%7brs%7d) matrisini !["3 \times 3"](https://render.githubusercontent.com/render/math?math=3%20%5ctimes%203) boyutunda örnek
-bir imge üzerinden kavrayalım. Aşağıdaki resimde imgede yer alan her bir
-gözeğin (yeşil) komşuları (kırmızı) gösterilmiştir.  
+Optimizasyon problemini çözmeye geçmeden önce matrisleri kullanarak enerji ifadesini daha sade ve çözümü daha kolay görülür şekilde yazalım. Yukarıda verilen enerji ifadesi 
+
+<p align="center"><img src="assets/post_resources/math//82ec3f1250465663fffbabde1b00245d.svg?invert_in_darkmode" align=middle width=201.89981459999998pt height=18.312383099999998pt/></p>
+
+matrissel biçiminde yazılabilir. Bu durumda enerji fonksiyonunu en küçükleyen <img src="assets/post_resources/math//f270c22e660f6744ca8d15f5c20bc78b.svg?invert_in_darkmode" align=middle width=33.50685194999999pt height=24.65753399999998pt/> vektörü de, bilinen <img src="assets/post_resources/math//315ed515a7438fe959a31cef786171d2.svg?invert_in_darkmode" align=middle width=33.67432859999999pt height=24.65753399999998pt/> ve <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> matrisleri kullanılarak
+
+<p align="center"><img src="assets/post_resources/math//db9d169d34e1dd8ede081a55aa1bdfec.svg?invert_in_darkmode" align=middle width=124.55552669999999pt height=18.312383099999998pt/></p>
+
+işlemi ile bulunur. Burada <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> matrisi her satırın da 8 komşu için ağırlıkları saklayan <img src="assets/post_resources/math//6498f82e0330e6a16f1d1e334e50bc20.svg?invert_in_darkmode" align=middle width=85.57058234999998pt height=22.465723500000017pt/> boyutlu bir seyrek matrisdir. <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> matrisini <img src="assets/post_resources/math//9f2b6b0a7f3d99fd3f396a1515926eb3.svg?invert_in_darkmode" align=middle width=36.52961069999999pt height=21.18721440000001pt/> boyutunda örnek bir imge üzerinden kavrayalım. Aşağıdaki resimde imgede yer alan her bir gözeğin (yeşil) komşuları (kırmızı) gösterilmiştir.  
   
 ![Görüntü Renklendirme Algoritması][neighbours]
   
-Bu imgede yer alan gözekler için oluşturulan ağırlık matrisi !["W_{rs}"](https://render.githubusercontent.com/render/math?math=W_%7brs%7d)
-aşağıdaki şekilde olacaktır. Matriste birinci satır 1. gözeğin, ikinci
-satır 2. gözeğin, dokuzuncu satır 9. gözeğin komşularına olan
-uzaklıklarını barındıracaktır.  
+Bu imgede yer alan gözekler için oluşturulan ağırlık matrisi <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> aşağıdaki şekilde olacaktır. Matriste birinci satır 1. gözeğin, ikinci satır 2. gözeğin, dokuzuncu satır 9. gözeğin komşularına olan uzaklıklarını barındıracaktır.  
   
-\\begin{equation}  
-\left \[  
-\\begin{array}{c}  
-U'(1)\\\\U'(2)\\\\U'(3)\\\\U'(4)\\\\U'(5)\\\\U'(6)\\\\U'(7)\\\\U'(8)\\\\U'(9)  
-\\end{array}  
-\right \] =  
-\left \[  
-\\begin{array}{ccccccccc}1 & w_{1}^{2} & 0 & w_{1}^{4} & w_{1}^{5} &
-0 & 0 & 0 & 0\\\\w_{2}^{1} & 1 & w_{2}^{3} & w_{2}^{4} & w_{2}^{5} &
-w_{2}^{6} & 0 & 0 & 0\\\\0 & w_{3}^{2} & 1 & 0 & w_{3}^{5} &
-w_{3}^{6} & 0 & 0 & 0\\\\w_{4}^{1} & w_{4}^{2} & 0 & 1 & w_{4}^{5} &
-0 & w_{4}^{7} & w_{4}^{8} & 0\\\\w_{5}^{1} & w_{5}^{2} & w_{5}^{3}
-& w_{5}^{4} & 1 & w_{5}^{6} & w_{5}^{7} & w_{5}^{8} &
-w_{5}^{9}\\\\0 & w_{6}^{2} & w_{6}^{3} & 0 & w_{6}^{5} & 1 & 0 &
-w_{6}^{8} & w_{6}^{9}\\\\0 & 0 & 0 & w_{7}^{4} & w_{7}^{5} & 0 & 1 &
-w_{7}^{8} & 0\\\\0 & 0 & 0 & w_{8}^{4} & w_{8}^{5} & w_{8}^{6} &
-w_{8}^{7} & 1 & w_{8}^{9}\\\\0 & 0 & 0 & 0 & w_{9}^{5} & w_{9}^{6} &
-0 & w_{9}^{8} & 1\\\\\\end{array}  
-\right \]^{-1}  
-\left \[  
-\\begin{array}{c}  
-U(1)\\\\U(2)\\\\U(3)\\\\U(4)\\\\U(5)\\\\U(6)\\\\U(7)\\\\U(8)\\\\U(9)  
-\\end{array}  
-\right \]  
-\\end{equation}  
+<p align="center"><img src="assets/post_resources/math//ae032d32c3fc88d75a2f1051453a1ae0.svg?invert_in_darkmode" align=middle width=488.48682299999996pt height=180.8876454pt/></p>
   
-Yukarıdaki formulasyonda da gösterildiği üzere yapmamız gereken işlemde
-bu matrisin tersine ihtiyacımız vardır. Matrisin boyutu (!["MN \timesMN"](https://render.githubusercontent.com/render/math?math=MN%20%5ctimesMN)) resmin boyutunun (!["MN"](https://render.githubusercontent.com/render/math?math=MN)) karesi ile hesaplandığından işlem yükü
-oldukça ağır sanılabilir ancak matrisin her satırında en fazla 8 eleman
-0 dan farklı olduğundan uygun algoritmalarla tersi bulma işlemi oldukça
-hızlandırılabilir. Bu çalışmada Gauss-Seidel yöntemi kullanılarak !["U"](https://render.githubusercontent.com/render/math?math=U) ve
-!["V"](https://render.githubusercontent.com/render/math?math=V) kanalları bulunmuştur.  
+Yukarıdaki formulasyonda da gösterildiği üzere yapmamız gereken işlemde bu matrisin tersine ihtiyacımız vardır. Matrisin boyutu (<img src="assets/post_resources/math//6498f82e0330e6a16f1d1e334e50bc20.svg?invert_in_darkmode" align=middle width=85.57058234999998pt height=22.465723500000017pt/>) resmin boyutunun (<img src="assets/post_resources/math//38c940e42b166347e72f8cc587bd9732.svg?invert_in_darkmode" align=middle width=32.73970589999999pt height=22.465723500000017pt/>) karesi ile hesaplandığından işlem yükü oldukça ağır sanılabilir ancak matrisin her satırında en fazla 8 eleman 0 dan farklı olduğundan uygun algoritmalarla tersi bulma işlemi oldukça hızlandırılabilir. Bu çalışmada Gauss-Seidel yöntemi kullanılarak <img src="assets/post_resources/math//6bac6ec50c01592407695ef84f457232.svg?invert_in_darkmode" align=middle width=13.01596064999999pt height=22.465723500000017pt/> ve <img src="assets/post_resources/math//a9a3a4a202d80326bda413b5562d5cd1.svg?invert_in_darkmode" align=middle width=13.242037049999992pt height=22.465723500000017pt/> kanalları bulunmuştur.  
   
 ### Gauss-Seidel
 
-Gauss-Seidel yöntemi !["Ax=b"](https://render.githubusercontent.com/render/math?math=Ax%3db) şeklinde verilen bir doğrusal denklem
-takımını iteratif olarak çözmekte kullanılan bir yöntemdir. !["A"](https://render.githubusercontent.com/render/math?math=A),
-!["N\times N"](https://render.githubusercontent.com/render/math?math=N%5ctimes%20N) matris, !["x"](https://render.githubusercontent.com/render/math?math=x) ve !["b"](https://render.githubusercontent.com/render/math?math=b) !["N\times 1"](https://render.githubusercontent.com/render/math?math=N%5ctimes%201) vektörler olmak üzere
-aranan !["x"](https://render.githubusercontent.com/render/math?math=x) vektörü şu iteratif adımlarla bulunur.
-!["x_{i}^{k+1}=\frac{1}{a_{ii}} \left ( b_i - \sum_{j=i}^{i-1}a_{ij}x_{j}^{k+1} - \sum_{j=i+1}^{N} a_{ij}x_{j}^{k} \right )"](https://render.githubusercontent.com/render/math?math=x_%7bi%7d%5e%7bk%2b1%7d%3d%5cfrac%7b1%7d%7ba_%7bii%7d%7d%20%5cleft%20%28%20b_i%20-%20%5csum_%7bj%3di%7d%5e%7bi-1%7da_%7bij%7dx_%7bj%7d%5e%7bk%2b1%7d%20-%20%5csum_%7bj%3di%2b1%7d%5e%7bN%7d%20a_%7bij%7dx_%7bj%7d%5e%7bk%7d%20%5cright%20%29)
-Denklem de verilen !["A"](https://render.githubusercontent.com/render/math?math=A) matrisi imge renklendirme probleminde ağırlık
-matrisini gösterdiğinden ve çok az sayıda elemanı 0 dan farklı
-olduğundan, uygun kod yazılması durumunda çözüm için gerekli işlem
-sayısı oldukça az olacaktır. Aşağıda verilen kod satırlarında !["A"](https://render.githubusercontent.com/render/math?math=A) ve !["b"](https://render.githubusercontent.com/render/math?math=b)
-matrisleri kullanılarak !["x"](https://render.githubusercontent.com/render/math?math=x) vektörü iteratif şekilde bulunur.
+Gauss-Seidel yöntemi <img src="assets/post_resources/math//6ffa573707fca115cad7b243d91a7109.svg?invert_in_darkmode" align=middle width=50.69621369999999pt height=22.831056599999986pt/> şeklinde verilen bir doğrusal denklem takımını iteratif olarak çözmekte kullanılan bir yöntemdir. <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/>, <img src="assets/post_resources/math//0ef69de18444d6cd8f1e8e13faf27443.svg?invert_in_darkmode" align=middle width=50.091150449999994pt height=22.465723500000017pt/> matris, <img src="assets/post_resources/math//332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.39498779999999pt height=14.15524440000002pt/> ve <img src="assets/post_resources/math//4bdc8d9bcfb35e1c9bfb51fc69687dfc.svg?invert_in_darkmode" align=middle width=7.054796099999991pt height=22.831056599999986pt/> <img src="assets/post_resources/math//f9c75bf2a73e8034bff58ed0c8e3c3c9.svg?invert_in_darkmode" align=middle width=43.31036984999999pt height=22.465723500000017pt/> vektörler olmak üzere aranan <img src="assets/post_resources/math//332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.39498779999999pt height=14.15524440000002pt/> vektörü şu iteratif adımlarla bulunur.
 
-  
+<p align="center"><img src="assets/post_resources/math//6ad732a3ae468d397ede83d414aa8f63.svg?invert_in_darkmode" align=middle width=321.87625634999995pt height=59.1786591pt/></p>
+
+Denklem de verilen <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/> matrisi imge renklendirme probleminde ağırlık matrisini gösterdiğinden ve çok az sayıda elemanı 0 dan farklı olduğundan, uygun kod yazılması durumunda çözüm için gerekli işlem sayısı oldukça az olacaktır. Aşağıda verilen kod satırlarında <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/> ve <img src="assets/post_resources/math//4bdc8d9bcfb35e1c9bfb51fc69687dfc.svg?invert_in_darkmode" align=middle width=7.054796099999991pt height=22.831056599999986pt/> matrisleri kullanılarak <img src="assets/post_resources/math//332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.39498779999999pt height=14.15524440000002pt/> vektörü iteratif şekilde bulunur.
+
 ```c
 void iterative_solver(double *A[9], double *b, int M, int N, int S) 
 {
@@ -223,19 +134,9 @@ void iterative_solver(double *A[9], double *b, int M, int N, int S)
 }
 ```
   
-Yukarıda verilen kod !["U"](https://render.githubusercontent.com/render/math?math=U) ve !["V"](https://render.githubusercontent.com/render/math?math=V) kanalları için çalıştırılıp sonuçlar
-bulunduktan sonra, renkli resim YUV uzayından RGB uzayına çevrilerek
-elde edilir.  
+Yukarıda verilen kod <img src="assets/post_resources/math//6bac6ec50c01592407695ef84f457232.svg?invert_in_darkmode" align=middle width=13.01596064999999pt height=22.465723500000017pt/> ve <img src="assets/post_resources/math//a9a3a4a202d80326bda413b5562d5cd1.svg?invert_in_darkmode" align=middle width=13.242037049999992pt height=22.465723500000017pt/> kanalları için çalıştırılıp sonuçlar bulunduktan sonra, renkli resim YUV uzayından RGB uzayına çevrilerek elde edilir.  
   
-Çalışmanın sonuçlarına ait örnekler ve kaynaklar aşağıda paylaşılmıştır.
-Bu paylaşımda anlatımı ve kodlamayı kolaylaştırmak için orjinal yayından
-kısmen farklı formüller ve algoritmalar kullanılmıştır. Bu nedenle
-aşağıdaki örnek renklendirmelerde orjinal algoritmadan biraz farklı ama
-kabul edilebilir sonuçlar elde edilmiştir. Görüntülerde ilk resimler gri
-kaynağı, ikinci resimler renklendirme işlemi için yapılan
-işaretlemeleri, üçüncü imge ise yazımızda anlatılan algoritmanın
-sonucunu göstermektedir. Son sıradaki imge ise elde edilmeye çalışılan
-renkli imgedir.  
+Çalışmanın sonuçlarına ait örnekler ve kaynaklar aşağıda paylaşılmıştır. Bu paylaşımda anlatımı ve kodlamayı kolaylaştırmak için orjinal yayından kısmen farklı formüller ve algoritmalar kullanılmıştır. Bu nedenle aşağıdaki örnek renklendirmelerde orjinal algoritmadan biraz farklı ama kabul edilebilir sonuçlar elde edilmiştir. Görüntülerde ilk resimler gri kaynağı, ikinci resimler renklendirme işlemi için yapılan işaretlemeleri, üçüncü imge ise yazımızda anlatılan algoritmanın sonucunu göstermektedir. Son sıradaki imge ise elde edilmeye çalışılan renkli imgedir.  
   
 ![Görüntü Renklendirme Örnek][example1]
 ![Görüntü Renklendirme Örnek][example2]
@@ -246,6 +147,7 @@ renkli imgedir.
 
 [RESOURCES]: # (List of the resources used by the blog post)
 [isoluminance]: /assets/post_resources/image_colorization/iso_lum.png
-[steps]: /assets/post_resources/image_colorization/tum_komsular.png
+[steps]: /assets/post_resources/image_colorization/imge_renklendirme_ornek.png
+[neighbours]: /assets/post_resources/image_colorization/tum_komsular.png
 [example1]: /assets/post_resources/image_colorization/gray2color_example1.png
 [example2]: /assets/post_resources/image_colorization/gray2color_example2.png
