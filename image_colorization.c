@@ -134,7 +134,7 @@ void colorize(matrix_t *gray_image, matrix_t *color_map, matrix_t *output) {
                 //printf("s: %3.6f ssum: %3.5f tsum: %3.5f  k: %01d\n", sigma,ssum, tsum, kk);
                 //system("pause");
 
-                sigma = max( (ssum -tsum*tsum/(kk+1))/(kk+1), min_varc/4.6, 2e-6 );
+                sigma = maximum( (ssum -tsum*tsum/(kk+1))/(kk+1), min_varc/4.6, 2e-6 );
 
                 tsum = 0;
                 for(k=0; k < 8; k++) {
