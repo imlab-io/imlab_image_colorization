@@ -56,15 +56,15 @@ for(int n=0; n < N; n++)
 
 Bu  prensip ise aşağıdaki formülasyon ile bir enerji optimizasyonu problemine dönüştürülebilir.
 
-<p align="center"><img src="assets/post_resources/math//8c6f0daf99e32ba81dc79ab2ed3a6f04.svg?invert_in_darkmode" align=middle width=281.30945699999995pt height=62.53027769999999pt/></p>
+$$E(U)=\sum_{r} \left ( U(r)- \sum_{s\in N(r)} w_{rs}U(s) \right)^2$$
 
-Yukarıda verilen ifade de <img src="assets/post_resources/math//6bac6ec50c01592407695ef84f457232.svg?invert_in_darkmode" align=middle width=13.01596064999999pt height=22.465723500000017pt/>, YUV renk uzayının bir bileşenini göstermektedir ve çalışmada bu ifade <img src="assets/post_resources/math//a9a3a4a202d80326bda413b5562d5cd1.svg?invert_in_darkmode" align=middle width=13.242037049999992pt height=22.465723500000017pt/> için de çözülmektedir. İfade, bir <img src="assets/post_resources/math//89f2e0d2d24bcf44db73aab8fc03252c.svg?invert_in_darkmode" align=middle width=7.87295519999999pt height=14.15524440000002pt/> gözeğinin değerinin, kendisini çevreleyen <img src="assets/post_resources/math//0795a09b10f06d8180b24b652140f0cc.svg?invert_in_darkmode" align=middle width=35.65835789999999pt height=24.65753399999998pt/> komşuluğundaki gözeklerin ağırlıklı ortalamasına yakın olmasını zorlamaktadır. Burada <img src="assets/post_resources/math//2a00fc03470855726f65f9d16bf65480.svg?invert_in_darkmode" align=middle width=24.43030259999999pt height=14.15524440000002pt/>, komşu gözeğin merkez gözeğe olan uzaklığını ölçmek için kullanılan ağırlık metriğini göstermektedir ve 
+Yukarıda verilen ifade de $U$, YUV renk uzayının bir bileşenini göstermektedir ve çalışmada bu ifade $V$ için de çözülmektedir. İfade, bir $r$ gözeğinin değerinin, kendisini çevreleyen $N(r)$ komşuluğundaki gözeklerin ağırlıklı ortalamasına yakın olmasını zorlamaktadır. Burada $w_{rs}$, komşu gözeğin merkez gözeğe olan uzaklığını ölçmek için kullanılan ağırlık metriğini göstermektedir ve 
 
-<p align="center"><img src="assets/post_resources/math//ba5f2da3b79c2b615af6cdac8934cc06.svg?invert_in_darkmode" align=middle width=145.56621255pt height=19.51056195pt/></p>
+$$w_{rs} \sim e^{-(Y(r)-Y(s))^2}$$
 
-formülü ile hesaplanmaktadır. Bu ifade basit şekilde <img src="assets/post_resources/math//89f2e0d2d24bcf44db73aab8fc03252c.svg?invert_in_darkmode" align=middle width=7.87295519999999pt height=14.15524440000002pt/> ve <img src="assets/post_resources/math//6f9bad7347b91ceebebd3ad7e6f6f2d1.svg?invert_in_darkmode" align=middle width=7.7054801999999905pt height=14.15524440000002pt/> noktaları arasındaki gri seviye farklılığı ölçmektedir.
+formülü ile hesaplanmaktadır. Bu ifade basit şekilde $r$ ve $s$ noktaları arasındaki gri seviye farklılığı ölçmektedir.
 
-Çalışmada komşuluk derecesi bir olarak seçilmiş ve herhangi bir gözeğin etrafını saran sekiz gözek komşu olarak değerlendirilmiştir. Aşağıda verilen kod satırlarında imgenin gözekleri tek tek dolanılmış ve renksiz olan her gözek için 8 komşusunun bu gözeğe olan gri seviye farklılıkları hesaplanmıştır. Hesaplanan bu değerler <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/> değişkeninde saklanmıştır.
+Çalışmada komşuluk derecesi bir olarak seçilmiş ve herhangi bir gözeğin etrafını saran sekiz gözek komşu olarak değerlendirilmiştir. Aşağıda verilen kod satırlarında imgenin gözekleri tek tek dolanılmış ve renksiz olan her gözek için 8 komşusunun bu gözeğe olan gri seviye farklılıkları hesaplanmıştır. Hesaplanan bu değerler $A$ değişkeninde saklanmıştır.
 
   
 ```c
@@ -85,29 +85,48 @@ for(r=0; r < M*N; r++)
 
 Optimizasyon problemini çözmeye geçmeden önce matrisleri kullanarak enerji ifadesini daha sade ve çözümü daha kolay görülür şekilde yazalım. Yukarıda verilen enerji ifadesi 
 
-<p align="center"><img src="assets/post_resources/math//82ec3f1250465663fffbabde1b00245d.svg?invert_in_darkmode" align=middle width=201.89981459999998pt height=18.312383099999998pt/></p>
+$$E(U)=||U(r)-W_{rs}U(s)||^2$$
 
-matrissel biçiminde yazılabilir. Bu durumda enerji fonksiyonunu en küçükleyen <img src="assets/post_resources/math//f270c22e660f6744ca8d15f5c20bc78b.svg?invert_in_darkmode" align=middle width=33.50685194999999pt height=24.65753399999998pt/> vektörü de, bilinen <img src="assets/post_resources/math//315ed515a7438fe959a31cef786171d2.svg?invert_in_darkmode" align=middle width=33.67432859999999pt height=24.65753399999998pt/> ve <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> matrisleri kullanılarak
+matrissel biçiminde yazılabilir. Bu durumda enerji fonksiyonunu en küçükleyen $U(s)$ vektörü de, bilinen $U(r)$ ve $W_{rs}$ matrisleri kullanılarak
 
-<p align="center"><img src="assets/post_resources/math//db9d169d34e1dd8ede081a55aa1bdfec.svg?invert_in_darkmode" align=middle width=124.55552669999999pt height=18.312383099999998pt/></p>
+$$U(s)=W_{rs}^{-1}U(r)$$
 
-işlemi ile bulunur. Burada <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> matrisi her satırın da 8 komşu için ağırlıkları saklayan <img src="assets/post_resources/math//6498f82e0330e6a16f1d1e334e50bc20.svg?invert_in_darkmode" align=middle width=85.57058234999998pt height=22.465723500000017pt/> boyutlu bir seyrek matrisdir. <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> matrisini <img src="assets/post_resources/math//9f2b6b0a7f3d99fd3f396a1515926eb3.svg?invert_in_darkmode" align=middle width=36.52961069999999pt height=21.18721440000001pt/> boyutunda örnek bir imge üzerinden kavrayalım. Aşağıdaki resimde imgede yer alan her bir gözeğin (yeşil) komşuları (kırmızı) gösterilmiştir.  
+işlemi ile bulunur. Burada $W_{rs}$ matrisi her satırın da 8 komşu için ağırlıkları saklayan $MN \times MN$ boyutlu bir seyrek matrisdir. $W_{rs}$ matrisini $3 \times 3$ boyutunda örnek bir imge üzerinden kavrayalım. Aşağıdaki resimde imgede yer alan her bir gözeğin (yeşil) komşuları (kırmızı) gösterilmiştir.  
   
 ![Görüntü Renklendirme Algoritması][neighbours]
   
-Bu imgede yer alan gözekler için oluşturulan ağırlık matrisi <img src="assets/post_resources/math//c41cfef05aafb8ab29b6c3948a2ba4e9.svg?invert_in_darkmode" align=middle width=28.18692854999999pt height=22.465723500000017pt/> aşağıdaki şekilde olacaktır. Matriste birinci satır 1. gözeğin, ikinci satır 2. gözeğin, dokuzuncu satır 9. gözeğin komşularına olan uzaklıklarını barındıracaktır.  
+Bu imgede yer alan gözekler için oluşturulan ağırlık matrisi $W_{rs}$ aşağıdaki şekilde olacaktır. Matriste birinci satır 1. gözeğin, ikinci satır 2. gözeğin, dokuzuncu satır 9. gözeğin komşularına olan uzaklıklarını barındıracaktır.  
   
-<p align="center"><img src="assets/post_resources/math//ae032d32c3fc88d75a2f1051453a1ae0.svg?invert_in_darkmode" align=middle width=488.48682299999996pt height=180.8876454pt/></p>
+$$  
+\begin{bmatrix}
+U'(1)\\ U'(2)\\ U'(3)\\ U'(4)\\ U'(5)\\ U'(6)\\ U'(7)\\ U'(8)\\ U'(9) 
+\end{bmatrix}=
+\begin{bmatrix}
+1 & w_{1}^{2} & 0 & w_{1}^{4} & w_{1}^{5} & 0 & 0 & 0 & 0\\
+w_{2}^{1} & 1 & w_{2}^{3} & w_{2}^{4} & w_{2}^{5} & w_{2}^{6} & 0 & 0 & 0\\
+0 & w_{3}^{2} & 1 & 0 & w_{3}^{5} &w_{3}^{6} & 0 & 0 & 0\\
+w_{4}^{1} & w_{4}^{2} & 0 & 1 & w_{4}^{5} &0 & w_{4}^{7} & w_{4}^{8} & 0\\
+w_{5}^{1} & w_{5}^{2} & w_{5}^{3} & w_{5}^{4} & 1 & w_{5}^{6} & w_{5}^{7} & w_{5}^{8} &
+w_{5}^{9}\\
+0 & w_{6}^{2} & w_{6}^{3} & 0 & w_{6}^{5} & 1 & 0 & w_{6}^{8} & w_{6}^{9}\\
+0 & 0 & 0 & w_{7}^{4} & w_{7}^{5} & 0 & 1 & w_{7}^{8} & 0\\
+0 & 0 & 0 & w_{8}^{4} & w_{8}^{5} & w_{8}^{6} & w_{8}^{7} & 1 & w_{8}^{9}\\
+0 & 0 & 0 & 0 & w_{9}^{5} & w_{9}^{6} & 0 & w_{9}^{8} & 1\\ 
+\end{bmatrix}^{-1} 
+\begin{bmatrix}
+U(1)\\U(2)\\U(3)\\U(4)\\U(5)\\U(6)\\U(7)\\U(8)\\U(9) 
+\end{bmatrix}
+$$
   
-Yukarıdaki formulasyonda da gösterildiği üzere yapmamız gereken işlemde bu matrisin tersine ihtiyacımız vardır. Matrisin boyutu (<img src="assets/post_resources/math//6498f82e0330e6a16f1d1e334e50bc20.svg?invert_in_darkmode" align=middle width=85.57058234999998pt height=22.465723500000017pt/>) resmin boyutunun (<img src="assets/post_resources/math//38c940e42b166347e72f8cc587bd9732.svg?invert_in_darkmode" align=middle width=32.73970589999999pt height=22.465723500000017pt/>) karesi ile hesaplandığından işlem yükü oldukça ağır sanılabilir ancak matrisin her satırında en fazla 8 eleman 0 dan farklı olduğundan uygun algoritmalarla tersi bulma işlemi oldukça hızlandırılabilir. Bu çalışmada Gauss-Seidel yöntemi kullanılarak <img src="assets/post_resources/math//6bac6ec50c01592407695ef84f457232.svg?invert_in_darkmode" align=middle width=13.01596064999999pt height=22.465723500000017pt/> ve <img src="assets/post_resources/math//a9a3a4a202d80326bda413b5562d5cd1.svg?invert_in_darkmode" align=middle width=13.242037049999992pt height=22.465723500000017pt/> kanalları bulunmuştur.  
+Yukarıdaki formulasyonda da gösterildiği üzere yapmamız gereken işlemde bu matrisin tersine ihtiyacımız vardır. Matrisin boyutu ($MN \times MN$) resmin boyutunun ($MN$) karesi ile hesaplandığından işlem yükü oldukça ağır sanılabilir ancak matrisin her satırında en fazla 8 eleman 0 dan farklı olduğundan uygun algoritmalarla tersi bulma işlemi oldukça hızlandırılabilir. Bu çalışmada Gauss-Seidel yöntemi kullanılarak $U$ ve $V$ kanalları bulunmuştur.  
   
 ### Gauss-Seidel
 
-Gauss-Seidel yöntemi <img src="assets/post_resources/math//6ffa573707fca115cad7b243d91a7109.svg?invert_in_darkmode" align=middle width=50.69621369999999pt height=22.831056599999986pt/> şeklinde verilen bir doğrusal denklem takımını iteratif olarak çözmekte kullanılan bir yöntemdir. <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/>, <img src="assets/post_resources/math//0ef69de18444d6cd8f1e8e13faf27443.svg?invert_in_darkmode" align=middle width=50.091150449999994pt height=22.465723500000017pt/> matris, <img src="assets/post_resources/math//332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.39498779999999pt height=14.15524440000002pt/> ve <img src="assets/post_resources/math//4bdc8d9bcfb35e1c9bfb51fc69687dfc.svg?invert_in_darkmode" align=middle width=7.054796099999991pt height=22.831056599999986pt/> <img src="assets/post_resources/math//f9c75bf2a73e8034bff58ed0c8e3c3c9.svg?invert_in_darkmode" align=middle width=43.31036984999999pt height=22.465723500000017pt/> vektörler olmak üzere aranan <img src="assets/post_resources/math//332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.39498779999999pt height=14.15524440000002pt/> vektörü şu iteratif adımlarla bulunur.
+Gauss-Seidel yöntemi $Ax=b$ şeklinde verilen bir doğrusal denklem takımını iteratif olarak çözmekte kullanılan bir yöntemdir. $A$, $N\times N$ matris, $x$ ve $b$ $N\times 1$ vektörler olmak üzere aranan $x$ vektörü şu iteratif adımlarla bulunur.
 
-<p align="center"><img src="assets/post_resources/math//6ad732a3ae468d397ede83d414aa8f63.svg?invert_in_darkmode" align=middle width=321.87625634999995pt height=59.1786591pt/></p>
+$$x_{i}^{k+1}=\frac{1}{a_{ii}} \left ( b_i - \sum_{j=i}^{i-1} a_{ij}x_{j}^{k+1} - \sum_{j=i+1}^{N} a_{ij}x_{j}^{k} \right )$$
 
-Denklem de verilen <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/> matrisi imge renklendirme probleminde ağırlık matrisini gösterdiğinden ve çok az sayıda elemanı 0 dan farklı olduğundan, uygun kod yazılması durumunda çözüm için gerekli işlem sayısı oldukça az olacaktır. Aşağıda verilen kod satırlarında <img src="assets/post_resources/math//53d147e7f3fe6e47ee05b88b166bd3f6.svg?invert_in_darkmode" align=middle width=12.32879834999999pt height=22.465723500000017pt/> ve <img src="assets/post_resources/math//4bdc8d9bcfb35e1c9bfb51fc69687dfc.svg?invert_in_darkmode" align=middle width=7.054796099999991pt height=22.831056599999986pt/> matrisleri kullanılarak <img src="assets/post_resources/math//332cc365a4987aacce0ead01b8bdcc0b.svg?invert_in_darkmode" align=middle width=9.39498779999999pt height=14.15524440000002pt/> vektörü iteratif şekilde bulunur.
+Denklem de verilen $A$ matrisi imge renklendirme probleminde ağırlık matrisini gösterdiğinden ve çok az sayıda elemanı 0 dan farklı olduğundan, uygun kod yazılması durumunda çözüm için gerekli işlem sayısı oldukça az olacaktır. Aşağıda verilen kod satırlarında $A$ ve $b$ matrisleri kullanılarak $x$ vektörü iteratif şekilde bulunur.
 
 ```c
 void iterative_solver(double *A[9], double *b, int M, int N, int S) 
@@ -134,7 +153,7 @@ void iterative_solver(double *A[9], double *b, int M, int N, int S)
 }
 ```
   
-Yukarıda verilen kod <img src="assets/post_resources/math//6bac6ec50c01592407695ef84f457232.svg?invert_in_darkmode" align=middle width=13.01596064999999pt height=22.465723500000017pt/> ve <img src="assets/post_resources/math//a9a3a4a202d80326bda413b5562d5cd1.svg?invert_in_darkmode" align=middle width=13.242037049999992pt height=22.465723500000017pt/> kanalları için çalıştırılıp sonuçlar bulunduktan sonra, renkli resim YUV uzayından RGB uzayına çevrilerek elde edilir.  
+Yukarıda verilen kod $U$ ve $V$ kanalları için çalıştırılıp sonuçlar bulunduktan sonra, renkli resim YUV uzayından RGB uzayına çevrilerek elde edilir.  
   
 Çalışmanın sonuçlarına ait örnekler ve kaynaklar aşağıda paylaşılmıştır. Bu paylaşımda anlatımı ve kodlamayı kolaylaştırmak için orjinal yayından kısmen farklı formüller ve algoritmalar kullanılmıştır. Bu nedenle aşağıdaki örnek renklendirmelerde orjinal algoritmadan biraz farklı ama kabul edilebilir sonuçlar elde edilmiştir. Görüntülerde ilk resimler gri kaynağı, ikinci resimler renklendirme işlemi için yapılan işaretlemeleri, üçüncü imge ise yazımızda anlatılan algoritmanın sonucunu göstermektedir. Son sıradaki imge ise elde edilmeye çalışılan renkli imgedir.  
   
